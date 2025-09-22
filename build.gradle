@@ -1,8 +1,11 @@
 plugins {
     id 'java'
     id 'idea'
+    id 'application'
     id 'com.google.protobuf' version '0.9.5'
 }
+
+mainClassName = 'greeting.server.GreetingServer'
 
 group = 'org.mdanylko.grpc.tutorial'
 version = '1.0-SNAPSHOT'
@@ -12,27 +15,29 @@ repositories {
 }
 
 protobuf {
-    protoc {
-        artifact = "com.google.protobuf:protoc:3.25.5"
+  protoc {
+    artifact = "com.google.protobuf:protoc:3.25.5"
+  }
+  plugins {
+    grpc {
+      artifact = 'io.grpc:protoc-gen-grpc-java:1.75.0'
     }
-    plugins {
-        grpc {
-            artifact = 'io.grpc:protoc-gen-grpc-java:1.75.0'
-        }
+  }
+  generateProtoTasks {
+    all()*.plugins {
+      grpc {}
     }
-    generateProtoTasks {
-        all().each { task ->
-            task.builtins {
-                java { option 'lite' }
-            }
-            task.plugins {
-                grpc { option 'lite' }
-            }
+  }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src/main/java'
+            srcDir '${buildDir}/generated/source'
         }
     }
 }
-
-sourceSets.main.java.srcDir new File(buildDir, 'generated/source')
 
 dependencies {
     testImplementation platform('org.junit:junit-bom:5.10.0')
