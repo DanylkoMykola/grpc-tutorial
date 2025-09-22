@@ -1,0 +1,49 @@
+plugins {
+    id 'java'
+    id 'idea'
+    id 'com.google.protobuf' version '0.9.5'
+}
+
+group = 'org.mdanylko.grpc.tutorial'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.25.5"
+    }
+    plugins {
+        grpc {
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.75.0'
+        }
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java { option 'lite' }
+            }
+            task.plugins {
+                grpc { option 'lite' }
+            }
+        }
+    }
+}
+
+sourceSets.main.java.srcDir new File(buildDir, 'generated/source')
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    runtimeOnly 'io.grpc:grpc-netty-shaded:1.75.0'
+    implementation 'io.grpc:grpc-protobuf:1.75.0'
+    implementation 'io.grpc:grpc-stub:1.75.0'
+}
+
+test {
+    useJUnitPlatform()
+}
