@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import com.proto.calculator.CalculatorAvgRequest;
+import com.proto.calculator.CalculatorAvgResponse;
 import com.proto.calculator.CalculatorPrimeRequest;
 import com.proto.calculator.CalculatorServiceGrpc;
 import com.proto.calculator.CalculatorSumRequest;
@@ -48,6 +50,9 @@ public class ClientGrpc {
                 break;
             case "prime":
                 doPrime(channel);
+                break;
+            case "avg":
+                doAvg(channel);
                 break;
             default:
                 System.out.println("Invalid arg: " + args[0]);
@@ -114,7 +119,6 @@ public class ClientGrpc {
             @Override
             public void onNext(GreetingResponse response) {
                 System.out.println(response.getResult());
-                
             }
             
         });
@@ -123,5 +127,34 @@ public class ClientGrpc {
         }
         streamObserver.onCompleted();
         countDownLatch.await(3, TimeUnit.SECONDS);
+    }
+
+    public static void doAvg(ManagedChannel channel) throws InterruptedException {
+        System.out.println("Enter doAvg");
+        CalculatorServiceGrpc.CalculatorServiceStub stub = CalculatorServiceGrpc.newStub(channel);
+
+        List<Integer> numbers = List.of(1, 2, 3, 4, 5);
+        CountDownLatch latch = new CountDownLatch(1);
+
+        StreamObserver<CalculatorAvgRequest> requestObserver = stub.avg(new StreamObserver<CalculatorAvgResponse>() {
+
+            @Override
+            public void onCompleted() {
+                latch.countDown();
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                
+            }
+
+            @Override
+            public void onNext(CalculatorAvgResponse response) {
+                System.out.println("Result: " + response.getResult());
+            }
+        });
+        numbers.stream().forEach(n -> requestObserver.onNext(CalculatorAvgRequest.newBuilder().setNumber(n).build()));
+        requestObserver.onCompleted();
+        latch.await(5, TimeUnit.SECONDS);
     }
 }

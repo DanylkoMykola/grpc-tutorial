@@ -22,7 +22,16 @@ message CalculatorPrimeResponse {
     int32 result = 1;
 }
 
+message CalculatorAvgRequest {
+    int32 number = 1;
+}
+
+message CalculatorAvgResponse {
+    double result = 1;
+}
+
 service CalculatorService {
     rpc sum(CalculatorSumRequest) returns (CalculatorSumResponse);
     rpc prime(CalculatorPrimeRequest) returns (stream CalculatorPrimeResponse);
+    rpc avg(stream CalculatorAvgRequest) returns (CalculatorAvgResponse);
 }

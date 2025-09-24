@@ -1,5 +1,12 @@
 package calculator.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.checkerframework.checker.units.qual.degrees;
+
+import com.proto.calculator.CalculatorAvgRequest;
+import com.proto.calculator.CalculatorAvgResponse;
 import com.proto.calculator.CalculatorPrimeRequest;
 import com.proto.calculator.CalculatorPrimeResponse;
 import com.proto.calculator.CalculatorServiceGrpc;
@@ -35,5 +42,31 @@ public class CalculatorSeviceImpl extends CalculatorServiceGrpc.CalculatorServic
             }
         }
         responseObserver.onCompleted();
+    }
+
+    @Override
+    public StreamObserver<CalculatorAvgRequest> avg(StreamObserver<CalculatorAvgResponse> responseObserver) {
+        List<Integer> numbers = new ArrayList<>();
+
+        return new StreamObserver<CalculatorAvgRequest>() {
+
+            @Override
+            public void onCompleted() {
+                double result = numbers.stream().mapToInt(Integer::intValue).average().getAsDouble();
+                responseObserver.onNext(CalculatorAvgResponse.newBuilder().setResult(result).build());  
+                responseObserver.onCompleted(); 
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                responseObserver.onError(t);    
+            }
+
+            @Override
+            public void onNext(CalculatorAvgRequest request) {
+                int number = request.getNumber();
+                numbers.add(number);
+            }
+        };
     }
 }
