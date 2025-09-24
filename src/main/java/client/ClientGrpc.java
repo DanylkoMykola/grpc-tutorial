@@ -1,7 +1,6 @@
 package client;
 
-import java.net.CacheResponse;
-
+import com.proto.calculator.CalculatorPrimeRequest;
 import com.proto.calculator.CalculatorServiceGrpc;
 import com.proto.calculator.CalculatorSumRequest;
 import com.proto.calculator.CalculatorSumResponse;
@@ -30,8 +29,14 @@ public class ClientGrpc {
             case "greet": 
                 doGreet(channel);
                 break;
+            case "greet_many_times":
+                doGreetManyTimes(channel);
+                break;
             case "sum" :
                 doSum(channel);
+                break;
+            case "prime":
+                doPrime(channel);
                 break;
             default:
                 System.out.println("Invalid arg: " + args[0]);
@@ -57,5 +62,20 @@ public class ClientGrpc {
 
         System.out.println("Sum: " + response.getResult());
     }
-    
+
+    private static void doGreetManyTimes(ManagedChannel channel) {
+        System.out.println("Enter doGreetManyTimes");
+        GreetingServiceGrpc.GreetingServiceBlockingStub stub = GreetingServiceGrpc.newBlockingStub(channel);
+        stub.greetManyTimes(GreetingRequest.newBuilder().setFirstName("Mykola").build()).forEachRemaining(response -> {
+            System.out.println(response.getResult());
+        });;
+    }
+
+    private static void doPrime(ManagedChannel channel) {
+        System.out.println("Enter doPrime");
+        CalculatorServiceGrpc.CalculatorServiceBlockingStub stub = CalculatorServiceGrpc.newBlockingStub(channel);
+        stub.prime(CalculatorPrimeRequest.newBuilder().setNumber(250).build()).forEachRemaining(response -> {
+            System.out.println(response.getResult());
+        });
+    }
 }

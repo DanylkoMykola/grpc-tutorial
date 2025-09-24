@@ -3,8 +3,8 @@ package server;
 import java.io.IOException;
 import java.util.List;
 
-import calculator.server.CalculatorSeviceImpl;
-import greeting.server.GreetingServiceImpl;
+import calculator.service.CalculatorSeviceImpl;
+import greeting.service.GreetingServiceImpl;
 import io.grpc.ServerBuilder;
 import io.grpc.BindableService;
 import io.grpc.Server;

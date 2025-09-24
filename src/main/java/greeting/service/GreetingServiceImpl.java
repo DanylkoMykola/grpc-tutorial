@@ -1,4 +1,4 @@
-package greeting.server;
+package greeting.service;
 
 import com.proto.greeting.GreetingServiceGrpc;
 
@@ -13,5 +13,14 @@ public class GreetingServiceImpl extends GreetingServiceGrpc.GreetingServiceImpl
         responseObserver.onNext(GreetingResponse.newBuilder().setResult("Hello " + request.getFirstName()).build());
         responseObserver.onCompleted();
     }
+
+    @Override
+    public void greetManyTimes(GreetingRequest request, StreamObserver<GreetingResponse> responseObserver) {
+        GreetingResponse response = GreetingResponse.newBuilder().setResult("Hello " + request.getFirstName()).build();
     
+        for (int i = 0; i < 10; i++) {
+            responseObserver.onNext(response);
+        }
+        responseObserver.onCompleted();
+    }
 }
