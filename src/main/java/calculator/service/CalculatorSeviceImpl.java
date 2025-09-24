@@ -3,8 +3,6 @@ package calculator.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.checkerframework.checker.units.qual.degrees;
-
 import com.proto.calculator.CalculatorAvgRequest;
 import com.proto.calculator.CalculatorAvgResponse;
 import com.proto.calculator.CalculatorPrimeRequest;

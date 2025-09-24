@@ -1,7 +1,6 @@
 package client;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -13,7 +12,6 @@ import com.proto.calculator.CalculatorPrimeRequest;
 import com.proto.calculator.CalculatorServiceGrpc;
 import com.proto.calculator.CalculatorSumRequest;
 import com.proto.calculator.CalculatorSumResponse;
-import com.proto.calculator.CalculatorServiceGrpc.CalculatorServiceBlockingStub;
 import com.proto.greeting.GreetingRequest;
 import com.proto.greeting.GreetingResponse;
 import com.proto.greeting.GreetingServiceGrpc;
