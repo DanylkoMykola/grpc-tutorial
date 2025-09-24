@@ -23,4 +23,32 @@ public class GreetingServiceImpl extends GreetingServiceGrpc.GreetingServiceImpl
         }
         responseObserver.onCompleted();
     }
+
+    @Override
+    public StreamObserver<GreetingRequest> longGreet(StreamObserver<GreetingResponse> responObserver) {
+        StringBuilder sb = new StringBuilder();
+        return new StreamObserver<GreetingRequest>() {
+
+            @Override
+            public void onCompleted() {
+                responObserver.onNext(GreetingResponse.newBuilder().setResult(sb.toString()).build());
+                responObserver.onCompleted();
+                
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                responObserver.onError(t);
+                
+            }
+
+            @Override
+            public void onNext(GreetingRequest request) {
+                sb.append("Hello ")
+                    .append(request.getFirstName())
+                    .append("!\n");
+            }
+            
+        };
+    }
 }

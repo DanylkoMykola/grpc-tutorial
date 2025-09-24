@@ -1,5 +1,12 @@
 package client;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import com.proto.calculator.CalculatorPrimeRequest;
 import com.proto.calculator.CalculatorServiceGrpc;
 import com.proto.calculator.CalculatorSumRequest;
@@ -11,6 +18,7 @@ import com.proto.greeting.GreetingServiceGrpc;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.stub.StreamObserver;
 
 public class ClientGrpc {
      public static void main(String[] args) throws InterruptedException {
@@ -31,6 +39,9 @@ public class ClientGrpc {
                 break;
             case "greet_many_times":
                 doGreetManyTimes(channel);
+                break;
+            case "long_greet":
+                doLongGreet(channel);
                 break;
             case "sum" :
                 doSum(channel);
@@ -77,5 +88,40 @@ public class ClientGrpc {
         stub.prime(CalculatorPrimeRequest.newBuilder().setNumber(250).build()).forEachRemaining(response -> {
             System.out.println(response.getResult());
         });
+    }
+
+    private static void doLongGreet(ManagedChannel channel) throws InterruptedException {
+        System.out.println("Enter doLongGreet");
+        GreetingServiceGrpc.GreetingServiceStub stub = GreetingServiceGrpc.newStub(channel);
+
+        List<String> names = new ArrayList<>();
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+
+        Collections.addAll(names, "Mykola", "Tom", "Psina");
+
+        StreamObserver<GreetingRequest> streamObserver = stub.longGreet(new StreamObserver<GreetingResponse>() {
+
+            @Override
+            public void onCompleted() {
+                countDownLatch.countDown();
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                
+            }
+
+            @Override
+            public void onNext(GreetingResponse response) {
+                System.out.println(response.getResult());
+                
+            }
+            
+        });
+        for (String name : names) {
+            streamObserver.onNext(GreetingRequest.newBuilder().setFirstName(name).build());
+        }
+        streamObserver.onCompleted();
+        countDownLatch.await(3, TimeUnit.SECONDS);
     }
 }
