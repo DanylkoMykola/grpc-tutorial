@@ -2,6 +2,7 @@ package greeting.service;
 
 import com.proto.greeting.GreetingServiceGrpc;
 
+import io.grpc.Context;
 import io.grpc.stub.StreamObserver;
 
 import com.proto.greeting.GreetingRequest;
@@ -73,5 +74,24 @@ public class GreetingServiceImpl extends GreetingServiceGrpc.GreetingServiceImpl
             
         };
     }
+
+    @Override
+    public void greetWithDeadline(GreetingRequest request, StreamObserver<GreetingResponse> responseObserever) {
+        Context context =  Context.current();
+
+        try {
+            for (int i = 0; i < 3; ++i) {
+                if (context.isCancelled()) {
+                    return;
+                }
+                Thread.sleep(100);
+            }
+            responseObserever.onNext(GreetingResponse.newBuilder().setResult("Hello " + request.getFirstName()).build());
+            responseObserever.onCompleted();
+        } catch (InterruptedException e) {
+            responseObserever.onError(e);
+        }
+       
+    } 
 
 }

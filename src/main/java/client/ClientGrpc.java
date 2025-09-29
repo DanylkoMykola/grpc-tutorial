@@ -19,8 +19,11 @@ import com.proto.greeting.GreetingRequest;
 import com.proto.greeting.GreetingResponse;
 import com.proto.greeting.GreetingServiceGrpc;
 
+import io.grpc.Deadline;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 
 public class ClientGrpc {
@@ -60,6 +63,9 @@ public class ClientGrpc {
                 break;
             case "sqrt":
                 doSqrt(channel);
+                break;
+            case "dead_line" :
+                doGreetWithDeadline(channel);
                 break;
             default:
                 System.out.println("Invalid arg: " + args[0]);
@@ -208,6 +214,30 @@ public class ClientGrpc {
             System.out.println("Sqrt -1 = " +response.getResult());
         } catch (RuntimeException e) {
             e.printStackTrace();
+        }
+    }
+
+    private static void doGreetWithDeadline(ManagedChannel channel) {
+        System.out.println("Enter doGreetWithDeadline");
+        GreetingServiceGrpc.GreetingServiceBlockingStub stub = GreetingServiceGrpc.newBlockingStub(channel);
+
+        GreetingResponse response = stub.withDeadline(Deadline.after(3, TimeUnit.SECONDS))
+                                        .greetWithDeadline(GreetingRequest.newBuilder().setFirstName("Mykola").build());
+        
+        System.out.println("Greeting within deadline: " + response.getResult());
+
+        try {
+            response = stub.withDeadline(Deadline.after(100, TimeUnit.SECONDS))
+                        .greetWithDeadline(GreetingRequest.newBuilder().setFirstName("Mykola").build());
+            System.out.println("Greeting Deadline exceeded");
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus().getCode() == Status.Code.DEADLINE_EXCEEDED) {
+                System.out.println("Deadline has been exceeded");
+            }
+            else {
+                System.out.println("Get exception");
+                e.printStackTrace();
+            }
         }
     }
 }
