@@ -13,6 +13,8 @@ import com.proto.calculator.CalculatorPrimeRequest;
 import com.proto.calculator.CalculatorServiceGrpc;
 import com.proto.calculator.CalculatorSumRequest;
 import com.proto.calculator.CalculatorSumResponse;
+import com.proto.calculator.SqrtRequest;
+import com.proto.calculator.SqrtResponse;
 import com.proto.greeting.GreetingRequest;
 import com.proto.greeting.GreetingResponse;
 import com.proto.greeting.GreetingServiceGrpc;
@@ -55,6 +57,9 @@ public class ClientGrpc {
                 break;
             case "avg":
                 doAvg(channel);
+                break;
+            case "sqrt":
+                doSqrt(channel);
                 break;
             default:
                 System.out.println("Invalid arg: " + args[0]);
@@ -188,5 +193,21 @@ public class ClientGrpc {
 
         requestObserver.onCompleted();
         latch.await(3, TimeUnit.SECONDS);
+    }
+
+    private static void doSqrt(ManagedChannel channel) {
+        System.out.println("Enter doSqrt");
+        CalculatorServiceGrpc.CalculatorServiceBlockingStub stub = CalculatorServiceGrpc.newBlockingStub(channel);
+
+        SqrtResponse response = stub.sqrt(SqrtRequest.newBuilder().setNumber(25).build());
+
+        System.out.println("Sqrt 25 = " + response.getResult());
+
+        try {
+            response = stub.sqrt(SqrtRequest.newBuilder().setNumber(-5).build());
+            System.out.println("Sqrt -1 = " +response.getResult());
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        }
     }
 }

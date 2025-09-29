@@ -10,7 +10,10 @@ import com.proto.calculator.CalculatorPrimeResponse;
 import com.proto.calculator.CalculatorServiceGrpc;
 import com.proto.calculator.CalculatorSumRequest;
 import com.proto.calculator.CalculatorSumResponse;
+import com.proto.calculator.SqrtRequest;
+import com.proto.calculator.SqrtResponse;
 
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 
 public class CalculatorSeviceImpl extends CalculatorServiceGrpc.CalculatorServiceImplBase  {
@@ -66,5 +69,19 @@ public class CalculatorSeviceImpl extends CalculatorServiceGrpc.CalculatorServic
                 numbers.add(number);
             }
         };
+    }
+    @Override
+    public void sqrt(SqrtRequest request, StreamObserver<SqrtResponse> responseObserver) {
+        int number = request.getNumber();
+
+        if (number < 0) {
+            responseObserver.onError(Status.INVALID_ARGUMENT
+                .withDescription("The number cannot be negattive!")
+                .augmentDescription("Number: " + number)
+                .asRuntimeException());
+            return;
+        }
+        responseObserver.onNext(SqrtResponse.newBuilder().setResult(Math.sqrt(number)).build());
+        responseObserver.onCompleted();
     }
 }
