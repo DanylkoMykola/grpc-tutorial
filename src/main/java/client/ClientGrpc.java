@@ -1,6 +1,7 @@
 package client;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -42,6 +43,9 @@ public class ClientGrpc {
                 break;
             case "long_greet":
                 doLongGreet(channel);
+                break;
+            case  "greet_everyone":
+                doGreetEveryone(channel);
                 break;
             case "sum" :
                 doSum(channel);
@@ -154,5 +158,35 @@ public class ClientGrpc {
         numbers.stream().forEach(n -> requestObserver.onNext(CalculatorAvgRequest.newBuilder().setNumber(n).build()));
         requestObserver.onCompleted();
         latch.await(5, TimeUnit.SECONDS);
+    }
+
+    private static void doGreetEveryone(ManagedChannel channel) throws InterruptedException {
+        System.out.println("Enter doGreetEveryone");
+        GreetingServiceGrpc.GreetingServiceStub stub = GreetingServiceGrpc.newStub(channel);
+        CountDownLatch latch = new CountDownLatch(1);
+
+        StreamObserver<GreetingRequest> requestObserver = stub.greetEveryone(new StreamObserver<GreetingResponse>() {
+
+            @Override
+            public void onCompleted() {
+                latch.countDown();
+            }
+
+            @Override
+            public void onError(Throwable t) {
+
+            }
+
+            @Override
+            public void onNext(GreetingResponse response) {
+                System.out.println(response.getResult());
+            }
+            
+        });
+        Arrays.asList("Mykola", "Tom", "Pes")
+            .forEach(name -> requestObserver.onNext(GreetingRequest.newBuilder().setFirstName(name).build()));
+
+        requestObserver.onCompleted();
+        latch.await(3, TimeUnit.SECONDS);
     }
 }
